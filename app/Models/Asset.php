@@ -101,6 +101,7 @@ class Asset extends Depreciable
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
+        'purchase_price' => 'decimal:4',
     ];
 
     protected $rules = [
@@ -167,6 +168,7 @@ class Asset extends Depreciable
         'next_audit_date',
         'last_checkin',
         'last_checkout',
+        'purchase_price',
     ];
 
     use Searchable;
@@ -910,7 +912,7 @@ class Asset extends Depreciable
     public function userRequests()
     {
         return $this->assetlog()
-            ->where('action_type', '=', 'requested')
+            ->whereIn('action_type', ['requested', 'purchase_requested'])
             ->orderBy('created_at', 'desc')
             ->withTrashed();
     }
@@ -1702,6 +1704,44 @@ class Asset extends Depreciable
                     )->orWhere('pending', '=', 1); // we've decided that even though an asset may be 'pending', you can still request it
                 }
             );
+    }
+
+    /**
+     * Query builder scope for Purchasable assets.
+     * Assets are purchasable when they exceed the configured age threshold,
+     * have a purchase_cost, their model has a depreciation, and they are not archived.
+     */
+    public function scopePurchasableAssets($query): Builder
+    {
+        $settings = Setting::getSettings();
+        $thresholdMonths = $settings->purchase_age_threshold_months ?? 48;
+        $cutoffDate = now()->subMonths($thresholdMonths);
+        $table = $query->getModel()->getTable();
+
+        return Company::scopeCompanyables(
+            $query->whereNotNull($table.'.purchase_date')
+                ->where($table.'.purchase_date', '<=', $cutoffDate)
+                ->whereNotNull($table.'.purchase_cost')
+                ->whereHas('model', function ($q) {
+                    $q->whereNotNull('depreciation_id');
+                })
+                ->whereHas('assetstatus', function ($q) {
+                    $q->where('archived', '=', 0);
+                })
+        );
+    }
+
+    /**
+     * Get the sale price for this asset.
+     * Returns manual purchase_price if set, otherwise the depreciated value.
+     */
+    public function getSalePriceAttribute(): ?float
+    {
+        if ($this->purchase_price !== null) {
+            return (float) $this->purchase_price;
+        }
+
+        return $this->getDepreciatedValue();
     }
 
     /**

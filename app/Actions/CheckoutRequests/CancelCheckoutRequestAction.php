@@ -2,6 +2,7 @@
 
 namespace App\Actions\CheckoutRequests;
 
+use App\Enums\CheckoutRequestType;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Company;
@@ -12,19 +13,23 @@ use Illuminate\Auth\Access\AuthorizationException;
 
 class CancelCheckoutRequestAction
 {
-    public static function run(Asset $asset, User $user)
+    /**
+     * Cancel a checkout or purchase request for an asset.
+     */
+    public static function run(Asset $asset, User $user, ?CheckoutRequestType $type = null)
     {
         if (! Company::isCurrentUserHasAccess($asset)) {
             throw new AuthorizationException;
         }
 
-        $asset->cancelRequest();
+        $asset->cancelRequest($user->id, $type);
 
         $asset->decrement('requests_counter', 1);
 
         $data['item'] = $asset;
         $data['target'] = $user;
         $data['item_quantity'] = 1;
+        $data['request_type'] = $type;
         $settings = Setting::getSettings();
 
         $logaction = new Actionlog;

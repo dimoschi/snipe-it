@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Enums\CheckoutRequestType;
 use App\Helpers\Helper;
 use App\Models\Setting;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -29,6 +30,11 @@ class RequestAssetNotification extends Notification
         $this->requested_date = Helper::getFormattedDateObject($params['requested_date'], 'datetime',
             false);
         $this->settings = Setting::getSettings();
+        $this->request_type = $params['request_type'] ?? null;
+        $this->sale_price = null;
+        if ($this->request_type === CheckoutRequestType::Purchase && $this->item) {
+            $this->sale_price = $this->item->sale_price;
+        }
 
         if (array_key_exists('note', $params)) {
             $this->note = $params['note'];
@@ -115,7 +121,11 @@ class RequestAssetNotification extends Notification
                 'intro_text' => trans('mail.a_user_requested'),
                 'qty' => $this->item_quantity,
             ])
-            ->subject('👀 '.trans('mail.Item_Requested'))
+            ->subject(
+                $this->request_type === CheckoutRequestType::Purchase
+                    ? trans('mail.purchase_requested')
+                    : '👀 '.trans('mail.Item_Requested')
+            )
             ->withSymfonyMessage(function (Email $message) {
                 $message->getHeaders()->addTextHeader(
                     'X-System-Sender', 'Snipe-IT'

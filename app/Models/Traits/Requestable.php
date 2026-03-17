@@ -2,6 +2,7 @@
 
 namespace App\Models\Traits;
 
+use App\Enums\CheckoutRequestType;
 use App\Models\CheckoutRequest;
 use App\Models\User;
 use Carbon\Carbon;
@@ -16,9 +17,15 @@ trait Requestable
         return $this->morphMany(CheckoutRequest::class, 'requestable');
     }
 
-    public function isRequestedBy(User $user)
+    public function isRequestedBy(User $user, ?CheckoutRequestType $type = null)
     {
-        return $this->requests->where('canceled_at', null)->where('user_id', $user->id)->first();
+        $query = $this->requests->where('canceled_at', null)->where('user_id', $user->id);
+
+        if ($type !== null) {
+            $query = $query->where('type', $type);
+        }
+
+        return $query->first();
     }
 
     public function scopeRequestedBy($query, User $user)
@@ -30,10 +37,16 @@ trait Requestable
         );
     }
 
-    public function request($qty = 1)
+    public function request($qty = 1, ?CheckoutRequestType $type = null)
     {
+        $type = $type ?? CheckoutRequestType::Checkout;
+
         $this->requests()->save(
-            new CheckoutRequest(['user_id' => auth()->id(), 'qty' => $qty])
+            new CheckoutRequest([
+                'user_id' => auth()->id(),
+                'qty' => $qty,
+                'type' => $type->value,
+            ])
         );
     }
 
@@ -42,12 +55,18 @@ trait Requestable
         $this->requests()->where('user_id', auth()->id())->delete();
     }
 
-    public function cancelRequest($user_id = null)
+    public function cancelRequest($user_id = null, ?CheckoutRequestType $type = null)
     {
         if (! $user_id) {
             $user_id = auth()->id();
         }
 
-        $this->requests()->where('user_id', $user_id)->update(['canceled_at' => Carbon::now()]);
+        $query = $this->requests()->where('user_id', $user_id);
+
+        if ($type !== null) {
+            $query = $query->where('type', $type->value);
+        }
+
+        $query->update(['canceled_at' => Carbon::now()]);
     }
 }
