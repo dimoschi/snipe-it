@@ -15,6 +15,8 @@ enum ActionType: string
     case CheckinFrom = 'checkin from';
     case Requested = 'requested';
     case RequestCanceled = 'request canceled';
+    case PurchaseRequested = 'purchase_requested';
+    case PurchaseApproved = 'purchase_approved';
     case Accepted = 'accepted';
     case Declined = 'declined';
     case Audit = 'audit';

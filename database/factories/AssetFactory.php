@@ -375,6 +375,21 @@ class AssetFactory extends Factory
         return $this->state(['status_id' => $id, 'requestable' => false]);
     }
 
+    /**
+     * Create an asset with an old purchase date, suitable for the purchase feature.
+     * Assets created with this state will be eligible for employee purchase
+     * if their model has a depreciation assigned.
+     */
+    public function purchasable()
+    {
+        return $this->state(function () {
+            return [
+                'purchase_date' => $this->faker->dateTimeBetween('-7 years', '-5 years', date_default_timezone_get())->format('Y-m-d'),
+                'purchase_cost' => $this->faker->randomFloat(2, '499.99', '2499.99'),
+            ];
+        });
+    }
+
     public function noPurchaseOrEolDate()
     {
         return $this->afterCreating(function (Asset $asset) {

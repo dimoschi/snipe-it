@@ -105,6 +105,8 @@ return [
     'requests' => [
         'error' => 'Request was not successful, please try again.',
         'success' => 'Request successfully submitted.',
+        'purchase_success' => 'Your purchase request has been submitted and is pending admin approval.',
+        'purchase_approved' => 'Purchase request has been approved. The asset has been marked as sold.',
         'canceled' => 'Request successfully canceled.',
         'cancel' => 'Cancel this item request',
     ],

@@ -52,6 +52,11 @@ class AssetSeeder extends Seeder
         Asset::factory()->count(20)->ultrafine()->state(new Sequence($this->getState()))->create();
         Asset::factory()->count(20)->ultrasharp()->state(new Sequence($this->getState()))->create();
 
+        // Old assets eligible for employee purchase
+        Asset::factory()->count(30)->laptopMbp()->purchasable()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(20)->phoneIphone11()->purchasable()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(10)->desktopOptiplex()->purchasable()->state(new Sequence($this->getState()))->create();
+
         $del_files = Storage::files('assets');
         foreach ($del_files as $del_file) { // iterate files
             Log::debug('Deleting: '.$del_files);

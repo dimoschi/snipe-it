@@ -26,6 +26,7 @@ class StatuslabelFactory extends Factory
             'archived' => 0,
             'created_at' => $this->faker->dateTime(),
             'created_by' => User::factory()->superuser(),
+            'default_purchase_label' => 0,
             'deleted_at' => null,
             'deployable' => 0,
             'name' => $this->faker->sentence(),

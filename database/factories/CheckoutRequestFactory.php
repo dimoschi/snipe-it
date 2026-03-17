@@ -41,4 +41,13 @@ class CheckoutRequestFactory extends Factory
             ];
         });
     }
+
+    public function forPurchase()
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'type' => 'purchase',
+            ];
+        });
+    }
 }

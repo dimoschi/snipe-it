@@ -116,4 +116,8 @@ return [
     'your_assets' => 'View Your Assets',
     'your_credentials' => 'Your Snipe-IT credentials',
     'mail_sent' => 'Mail sent successfully!',
+    'purchase_approved_subject' => 'Your asset purchase has been approved',
+    'purchase_approved_greeting' => 'Your purchase request has been approved!',
+    'purchase_approved_body' => 'Your purchase request for :asset has been approved. Sale price: :price.',
+    'purchase_requested' => 'An employee has requested to purchase an asset',
 ];

@@ -29,6 +29,12 @@ class StatuslabelSeeder extends Seeder
             'created_by' => $admin->id,
         ]);
 
+        Statuslabel::factory()->archived()->create([
+            'name' => 'Sold',
+            'created_by' => $admin->id,
+            'default_purchase_label' => 1,
+        ]);
+
         Statuslabel::factory()->outForDiagnostics()->create(['created_by' => $admin->id]);
         Statuslabel::factory()->outForRepair()->create(['created_by' => $admin->id]);
         Statuslabel::factory()->broken()->create(['created_by' => $admin->id]);

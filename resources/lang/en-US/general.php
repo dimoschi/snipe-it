@@ -753,4 +753,20 @@ return [
 
     'months_plural' => '1 month|:count months',
 
+    'purchase_not_configured' => 'Asset purchases are not configured. Please mark a status label as the default purchase label.',
+    'asset_already_sold' => 'This asset has already been sold or archived.',
+    'purchase_approved_log' => 'Sold to :buyer for :price',
+    'buyer' => 'Buyer',
+    'sale_price' => 'Sale Price',
+    'purchase_request' => 'Purchase Request',
+    'available_for_purchase' => 'Available for Purchase',
+    'request_purchase' => 'Request Purchase',
+    'cancel_purchase_request' => 'Cancel Purchase Request',
+    'approve_sale' => 'Approve Sale',
+    'purchase_settings' => 'Asset Purchases',
+    'purchase_age_threshold' => 'Purchase eligibility age (months)',
+    'purchase_age_threshold_help' => 'Assets older than this many months (with a depreciation model assigned) will be eligible for employee purchase.',
+    'purchasable_help' => 'These assets have exceeded the minimum age threshold and are available for employee purchase at the listed price.',
+    'invalid_request_type' => 'Invalid request type. Must be "checkout" or "purchase".',
+    'age' => 'Age (months)',
 ];
