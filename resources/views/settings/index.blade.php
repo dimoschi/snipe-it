@@ -204,6 +204,21 @@
           </div>
         </div>
 
+        <div class="col-md-4 col-lg-3 col-sm-6 col-xl-1">
+          <div class="admin box box-default">
+            <div class="box-body text-center">
+              <h5>
+                <a href="{{ route('settings.purchases.index') }}" class="settings_button">
+                  <i class="fas fa-shopping-cart fa-4x" aria-hidden="true"></i>
+                  <br><br>
+                  <span class="name">{{ trans('general.purchase_settings') }}</span>
+                  <span class="keywords" aria-hidden="true" style="display:none">{{ trans('general.purchase_settings') }}</span>
+                </a>
+              </h5>
+              <p class="index-block">{{ trans('general.purchasable_help') }}</p>
+            </div>
+          </div>
+        </div>
 
         <div class="col-md-4 col-lg-3 col-sm-6 col-xl-1">
           <div class="admin box box-default">

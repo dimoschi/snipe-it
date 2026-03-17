@@ -16,7 +16,7 @@
     <div class="col-md-12">
 
 
-        @if (($assets->count() < 1) && ($models->count() < 1))
+        @if (($assets->count() < 1) && ($models->count() < 1) && (! $purchaseEnabled))
 
             <div class="col-md-12">
                 <div class="alert alert-info fade in">
@@ -33,14 +33,20 @@
                 <li class="active">
                     <a href="#assets" data-toggle="tab" title="{{ trans('general.assets') }}">{{ trans('general.assets') }}
                         <span class="badge badge-secondary"> {{ $assets->count()}}</span>
-                    </a>               
+                    </a>
                 </li>
                 @endif
                 @if ($models->count() > 0)
                 <li>
                     <a href="#models" data-toggle="tab" title="{{ trans('general.asset_models') }}">{{ trans('general.asset_models') }}
                         <span class="badge badge-secondary"> {{ $models->count()}}</span>
-                    </a>                   
+                    </a>
+                </li>
+                @endif
+                @if ($purchaseEnabled)
+                <li class="{{ ($assets->count() == 0 && $models->count() == 0) ? 'active' : '' }}">
+                    <a href="#purchasable" data-toggle="tab" title="{{ trans('general.available_for_purchase') }}">{{ trans('general.available_for_purchase') }}
+                    </a>
                 </li>
                 @endif
             </ul>
@@ -156,6 +162,41 @@
                 </div>
                 @endif
 
+                @if ($purchaseEnabled)
+                <div class="tab-pane fade in {{ ($assets->count() == 0 && $models->count() == 0) ? 'active' : '' }}" id="purchasable">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p class="help-block">{{ trans('general.purchasable_help') }}</p>
+                            <table
+                                data-cookie-id-table="purchasableAssetsTable"
+                                data-id-table="purchasableAssetsTable"
+                                data-side-pagination="server"
+                                data-show-export="false"
+                                data-show-footer="false"
+                                data-sort-order="asc"
+                                data-sort-name="name"
+                                id="purchasableAssetsTable"
+                                class="table table-striped snipe-table"
+                                data-url="{{ route('api.assets.purchasable') }}">
+                                <thead>
+                                    <tr>
+                                        <th class="col-md-1" data-field="image" data-formatter="imageFormatter" data-sortable="false">{{ trans('general.image') }}</th>
+                                        <th class="col-md-2" data-field="asset_tag" data-sortable="true">{{ trans('general.asset_tag') }}</th>
+                                        <th class="col-md-2" data-field="name" data-sortable="true">{{ trans('admin/hardware/form.name') }}</th>
+                                        <th class="col-md-2" data-field="model" data-sortable="true">{{ trans('admin/hardware/table.asset_model') }}</th>
+                                        <th class="col-md-1" data-field="serial" data-sortable="true">{{ trans('admin/hardware/table.serial') }}</th>
+                                        <th class="col-md-1" data-field="location" data-sortable="true">{{ trans('admin/hardware/table.location') }}</th>
+                                        <th class="col-md-1" data-field="age_months" data-sortable="true">{{ trans('general.age') }}</th>
+                                        <th class="col-md-1" data-field="sale_price" data-sortable="true">{{ trans('general.sale_price') }}</th>
+                                        <th class="col-md-1" data-formatter="assetPurchaseActionsFormatter" data-field="available_actions" data-sortable="false">{{ trans('table.actions') }}</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
             </div> <!-- .tab-content-->
         </div> <!-- .nav-tabs-custom -->
 
@@ -184,5 +225,3 @@
     });
 </script>
 @stop
-
-

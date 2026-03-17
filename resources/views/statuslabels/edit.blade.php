@@ -70,5 +70,17 @@
     </div>
 </div>
 
+<!-- Default Purchase Label -->
+<div class="form-group{{ $errors->has('default_purchase_label') ? ' has-error' : '' }}">
+
+    <div class="col-md-9 col-md-offset-3">
+        <label class="form-control">
+            <input type="checkbox" value="1" name="default_purchase_label" id="default_purchase_label" {{ old('default_purchase_label', $item->default_purchase_label) == '1' ? ' checked="checked"' : '' }}>
+             {{ trans('admin/statuslabels/table.default_purchase_label') }}
+        </label>
+        <p class="help-block"> {{ trans('admin/statuslabels/table.default_purchase_label_help') }}</p>
+    </div>
+</div>
+
 @stop
 

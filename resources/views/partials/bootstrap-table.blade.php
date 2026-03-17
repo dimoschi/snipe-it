@@ -1293,7 +1293,13 @@
 
     }
 
-
+    function assetPurchaseActionsFormatter (value, row) {
+        if (value && value.cancel_purchase) {
+            return '<form method="POST" action="{{ config('app.url') }}/account/request-asset/' + row.id + '/cancel">@csrf<input type="hidden" name="type" value="purchase"><button class="btn btn-danger btn-sm btn-block" type="submit">{{ trans('general.cancel_purchase_request') }}</button></form>';
+        } else if (value && value.request_purchase) {
+            return '<form method="POST" action="{{ config('app.url') }}/account/request-asset/' + row.id + '">@csrf<input type="hidden" name="type" value="purchase"><button class="btn btn-success btn-sm btn-block" type="submit">{{ trans('general.request_purchase') }}</button></form>';
+        }
+    }
 
     var formatters = [
         'accessories',

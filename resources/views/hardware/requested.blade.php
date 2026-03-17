@@ -34,10 +34,11 @@
                                 <tr role="row">
                                     <th class="col-md-1">{{ trans('general.image') }}</th>
                                     <th class="col-md-2">{{ trans('general.name') }}</th>
-                                    <th class="col-md-2" data-sortable="true">{{ trans('admin/hardware/table.location') }}</th>
-                                    <th class="col-md-2" data-sortable="true">{{ trans('admin/hardware/form.expected_checkin') }}</th>
-                                    <th class="col-md-3" data-sortable="true">{{ trans('admin/hardware/table.requesting_user') }}</th>
-                                    <th class="col-md-2">{{ trans('admin/hardware/table.requested_date') }}</th>
+                                    <th class="col-md-1" data-sortable="true">{{ trans('admin/hardware/table.location') }}</th>
+                                    <th class="col-md-1" data-sortable="true">{{ trans('admin/hardware/form.expected_checkin') }}</th>
+                                    <th class="col-md-2" data-sortable="true">{{ trans('admin/hardware/table.requesting_user') }}</th>
+                                    <th class="col-md-1">{{ trans('admin/hardware/table.requested_date') }}</th>
+                                    <th class="col-md-1">{{ trans('general.type') }}</th>
                                     <th class="col-md-1">{{ trans('button.actions') }}</th>
                                     <th class="col-md-1">{{ trans('general.checkout') }}</th>
                                 </tr>
@@ -90,6 +91,16 @@
                                             {{ App\Helpers\Helper::getFormattedDateObject($request->created_at, 'datetime', false) }}
                                         </td>
                                         <td>
+                                            @if ($request->type?->value === 'purchase')
+                                                <span class="label label-warning">{{ trans('general.purchase_request') }}</span>
+                                                @if ($request->itemType() == 'asset')
+                                                    <br><small>{{ $snipeSettings->default_currency }}{{ $request->requestable->sale_price }}</small>
+                                                @endif
+                                            @else
+                                                <span class="label label-info">{{ trans('general.checkout') }}</span>
+                                            @endif
+                                        </td>
+                                        <td>
                                             <form
                                             method="POST"
                                             action="{{ route('account/request-item', [
@@ -106,7 +117,15 @@
                                         </td>
                                         <td>
                                             @if ($request->itemType() == "asset")
-                                                @if ($request->requestable->assigned_to=='')
+                                                @if ($request->type?->value === 'purchase')
+                                                    <button type="button" class="btn btn-sm btn-success"
+                                                        data-toggle="modal"
+                                                        data-target="#approvePurchaseModal-{{ $request->id }}"
+                                                        data-tooltip="true"
+                                                        title="{{ trans('general.approve_sale') }}">
+                                                        {{ trans('general.approve_sale') }}
+                                                    </button>
+                                                @elseif ($request->requestable->assigned_to=='')
                                                     <a href="{{ config('app.url') }}/hardware/{{ $request->requestable->id }}/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_user_tooltip') }}">{{ trans('general.checkout') }}</a>
                                                 @else
                                                     <a href="{{ config('app.url') }}/hardware/{{ $request->requestable->id }}/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_tooltip') }}">{{ trans('general.checkin') }}</a>
@@ -119,6 +138,34 @@
                                 @endforeach
                             </tbody>
                         </table>
+
+                        {{-- Purchase approval modals --}}
+                        @foreach ($requestedItems as $request)
+                            @if ($request->type?->value === 'purchase' && $request->requestable)
+                                <div class="modal fade" id="approvePurchaseModal-{{ $request->id }}" tabindex="-1" role="dialog">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <form method="POST" action="{{ route('hardware.purchase.approve', [$request->requestable->id, $request->id]) }}">
+                                                @csrf
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                                                    <h4 class="modal-title">{{ trans('general.approve_sale') }}</h4>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p><strong>{{ trans('general.asset') }}:</strong> {{ $request->name() }}</p>
+                                                    <p><strong>{{ trans('general.buyer') }}:</strong> {{ $request->requestingUser() ? $request->requestingUser()->display_name : trans('admin/reports/general.deleted_user') }}</p>
+                                                    <p><strong>{{ trans('general.sale_price') }}:</strong> {{ $snipeSettings->default_currency }}{{ $request->requestable->sale_price }}</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('button.cancel') }}</button>
+                                                    <button type="submit" class="btn btn-success">{{ trans('general.approve_sale') }}</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
 
                     </div> <!-- /.col-md-12 -->
                 </div> <!-- /.row -->
