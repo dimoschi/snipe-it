@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Assets;
 
+use App\Actions\CheckoutRequests\ApprovePurchaseAction;
 use App\Events\CheckoutableCheckedIn;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
@@ -1086,14 +1087,34 @@ class AssetsController extends Controller
     public function getRequestedIndex($user_id = null)
     {
         $this->authorize('index', Asset::class);
-        $requestedItems = CheckoutRequest::with('user', 'requestedItem')->whereNull('canceled_at')->with('user', 'requestedItem');
+        $requestedItems = CheckoutRequest::with('user', 'requestedItem')
+            ->whereNull('canceled_at')
+            ->whereNull('fulfilled_at');
 
         if ($user_id) {
-            $requestedItems->where('user_id', $user_id)->get();
+            $requestedItems->where('user_id', $user_id);
         }
 
         $requestedItems = $requestedItems->orderBy('created_at', 'desc')->get();
 
         return view('hardware/requested', compact('requestedItems'));
+    }
+
+    /**
+     * Approve a purchase request for an asset.
+     */
+    public function approvePurchase(Asset $asset, CheckoutRequest $checkoutRequest): RedirectResponse
+    {
+        $this->authorize('checkout', $asset);
+
+        try {
+            ApprovePurchaseAction::run($asset, $checkoutRequest);
+
+            return redirect()->route('assets.requested')
+                ->with('success', trans('admin/hardware/message.requests.purchase_approved'));
+        } catch (\Exception $e) {
+            return redirect()->route('assets.requested')
+                ->with('error', $e->getMessage());
+        }
     }
 }

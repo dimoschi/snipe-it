@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use App\Actions\CheckoutRequests\CancelCheckoutRequestAction;
 use App\Actions\CheckoutRequests\CreateCheckoutRequestAction;
 use App\Enums\ActionType;
+use App\Enums\CheckoutRequestType;
 use App\Exceptions\AssetNotRequestable;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Setting;
+use App\Models\Statuslabel;
 use App\Models\User;
 use App\Notifications\RequestAssetCancelation;
 use App\Notifications\RequestAssetNotification;
@@ -158,7 +160,9 @@ class ViewAssetsController extends Controller
             },
         ])->RequestableModels()->get();
 
-        return view('account/requestable-assets', compact('assets', 'models'));
+        $purchaseEnabled = Statuslabel::where('default_purchase_label', 1)->exists();
+
+        return view('account/requestable-assets', compact('assets', 'models', 'purchaseEnabled'));
     }
 
     public function getRequestItem(Request $request, $itemType, $itemId = null, $cancel_by_admin = false, $requestingUser = null): RedirectResponse
@@ -225,12 +229,21 @@ class ViewAssetsController extends Controller
      *
      * @param  null  $assetId
      */
-    public function store(Asset $asset): RedirectResponse
+    public function store(Request $request, Asset $asset): RedirectResponse
     {
         try {
-            CreateCheckoutRequestAction::run($asset, auth()->user());
+            $type = null;
+            if ($request->input('type') === 'purchase') {
+                $type = CheckoutRequestType::Purchase;
+            }
 
-            return redirect()->route('requestable-assets')->with('success')->with('success', trans('admin/hardware/message.requests.success'));
+            CreateCheckoutRequestAction::run($asset, auth()->user(), $type);
+
+            $successMessage = ($type === CheckoutRequestType::Purchase)
+                ? trans('admin/hardware/message.requests.purchase_success')
+                : trans('admin/hardware/message.requests.success');
+
+            return redirect()->route('requestable-assets')->with('success', $successMessage);
         } catch (AssetNotRequestable $e) {
             return redirect()->back()->with('error', 'Asset is not requestable');
         } catch (AuthorizationException $e) {
@@ -242,12 +255,17 @@ class ViewAssetsController extends Controller
         }
     }
 
-    public function destroy(Asset $asset): RedirectResponse
+    public function destroy(Request $request, Asset $asset): RedirectResponse
     {
         try {
-            CancelCheckoutRequestAction::run($asset, auth()->user());
+            $type = null;
+            if ($request->input('type') === 'purchase') {
+                $type = CheckoutRequestType::Purchase;
+            }
 
-            return redirect()->route('requestable-assets')->with('success')->with('success', trans('admin/hardware/message.requests.canceled'));
+            CancelCheckoutRequestAction::run($asset, auth()->user(), $type);
+
+            return redirect()->route('requestable-assets')->with('success', trans('admin/hardware/message.requests.canceled'));
         } catch (Exception $e) {
             report($e);
 

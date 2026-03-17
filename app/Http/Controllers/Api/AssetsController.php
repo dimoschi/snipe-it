@@ -26,6 +26,7 @@ use App\Models\License;
 use App\Models\LicenseSeat;
 use App\Models\Location;
 use App\Models\Setting;
+use App\Models\Statuslabel;
 use App\Models\User;
 use App\Observers\AssetObserver;
 use App\View\Label;
@@ -1319,6 +1320,31 @@ class AssetsController extends Controller
         $assets = $assets->skip($offset)->take($limit)->get();
 
         return (new AssetsTransformer)->transformRequestedAssets($assets, $total);
+    }
+
+    /**
+     * Returns a list of assets eligible for employee purchase.
+     */
+    public function purchasable(Request $request): JsonResponse|array
+    {
+        $this->authorize('viewRequestable', Asset::class);
+
+        if (! Statuslabel::where('default_purchase_label', 1)->exists()) {
+            return (new AssetsTransformer)->transformPurchasableAssets(collect(), 0);
+        }
+
+        $assets = Asset::select('assets.*')
+            ->with('model', 'model.depreciation', 'defaultLoc', 'location', 'assetstatus', 'requests')
+            ->Hardware()
+            ->PurchasableAssets();
+
+        $offset = ($request->input('offset') > $assets->count()) ? $assets->count() : app('api_offset_value');
+        $limit = app('api_limit_value');
+
+        $total = $assets->count();
+        $assets = $assets->skip($offset)->take($limit)->get();
+
+        return (new AssetsTransformer)->transformPurchasableAssets($assets, $total);
     }
 
     public function assignedAssets(Request $request, Asset $asset): JsonResponse|array

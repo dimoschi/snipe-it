@@ -34,6 +34,7 @@ class StatuslabelsController extends Controller
             'color',
             'notes',
             'default_label',
+            'default_purchase_label',
         ];
 
         $statuslabels = Statuslabel::with('adminuser')->withCount('assets as assets_count');
@@ -108,6 +109,7 @@ class StatuslabelsController extends Controller
         $statuslabel->color = $request->input('color');
         $statuslabel->show_in_nav = $request->input('show_in_nav', 0);
         $statuslabel->default_label = $request->input('default_label', 0);
+        $statuslabel->default_purchase_label = $request->input('default_purchase_label', 0);
 
         if ($statuslabel->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', $statuslabel, trans('admin/statuslabels/message.create.success')));
@@ -163,6 +165,7 @@ class StatuslabelsController extends Controller
         $statuslabel->color = $request->input('color');
         $statuslabel->show_in_nav = $request->input('show_in_nav', 0);
         $statuslabel->default_label = $request->input('default_label', 0);
+        $statuslabel->default_purchase_label = $request->input('default_purchase_label', 0);
 
         if ($statuslabel->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', $statuslabel, trans('admin/statuslabels/message.update.success')));

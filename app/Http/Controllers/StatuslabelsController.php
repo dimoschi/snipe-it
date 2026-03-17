@@ -71,6 +71,7 @@ class StatuslabelsController extends Controller
         $statusLabel->color = $request->input('color');
         $statusLabel->show_in_nav = $request->input('show_in_nav', 0);
         $statusLabel->default_label = $request->input('default_label', 0);
+        $statusLabel->default_purchase_label = $request->input('default_purchase_label', 0);
 
         if ($statusLabel->save()) {
             // Redirect to the new Statuslabel  page
@@ -119,6 +120,7 @@ class StatuslabelsController extends Controller
         $statuslabel->color = $request->input('color');
         $statuslabel->show_in_nav = $request->input('show_in_nav', 0);
         $statuslabel->default_label = $request->input('default_label', 0);
+        $statuslabel->default_purchase_label = $request->input('default_purchase_label', 0);
 
         // Was the asset created?
         if ($statuslabel->save()) {

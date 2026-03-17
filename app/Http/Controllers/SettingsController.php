@@ -1155,4 +1155,33 @@ class SettingsController extends Controller
     {
         return view('settings.logins');
     }
+
+    /**
+     * Show the purchase settings form.
+     */
+    public function getPurchaseSettings(): View
+    {
+        $setting = Setting::getSettings();
+
+        return view('settings.purchases', compact('setting'));
+    }
+
+    /**
+     * Save the purchase settings.
+     */
+    public function postPurchaseSettings(Request $request): RedirectResponse
+    {
+        if (is_null($setting = Setting::getSettings())) {
+            return redirect()->to('admin')->with('error', trans('admin/settings/message.update.error'));
+        }
+
+        $setting->purchase_age_threshold_months = $request->input('purchase_age_threshold_months', 48);
+
+        if ($setting->save()) {
+            return redirect()->route('settings.purchases.index')
+                ->with('success', trans('admin/settings/message.update.success'));
+        }
+
+        return redirect()->back()->withInput()->withErrors($setting->getErrors());
+    }
 }

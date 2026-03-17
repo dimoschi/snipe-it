@@ -220,6 +220,15 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
     Route::post('labels', [SettingsController::class, 'postLabels'])
         ->name('settings.labels.save');
 
+    Route::get('purchases', [SettingsController::class, 'getPurchaseSettings'])
+        ->name('settings.purchases.index')
+        ->breadcrumbs(fn (Trail $trail) =>
+        $trail->parent('settings.index')
+            ->push(trans('general.purchase_settings'), route('settings.purchases.index')));
+
+    Route::post('purchases', [SettingsController::class, 'postPurchaseSettings'])
+        ->name('settings.purchases.save');
+
     Route::get('ldap', [SettingsController::class, 'getLdapSettings'])
         ->name('settings.ldap.index')
         ->breadcrumbs(fn (Trail $trail) =>

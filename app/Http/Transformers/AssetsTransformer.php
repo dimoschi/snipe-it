@@ -2,6 +2,7 @@
 
 namespace App\Http\Transformers;
 
+use App\Enums\CheckoutRequestType;
 use App\Helpers\Helper;
 use App\Models\Accessory;
 use App\Models\AccessoryCheckout;
@@ -282,6 +283,42 @@ class AssetsTransformer
         $array += $permissions_array;
 
         return $array;
+    }
+
+    public function transformPurchasableAssets($assets, $total)
+    {
+        $array = [];
+        foreach ($assets as $asset) {
+            $array[] = self::transformPurchasableAsset($asset);
+        }
+
+        return (new DatatablesTransformer)->transformDatatables($array, $total);
+    }
+
+    public function transformPurchasableAsset(Asset $asset)
+    {
+        $purchaseRequested = (auth()->check() && $asset->isRequestedBy(
+            auth()->user(),
+            CheckoutRequestType::Purchase
+        )) ? true : false;
+
+        return [
+            'id' => (int) $asset->id,
+            'name' => e($asset->name),
+            'asset_tag' => e($asset->asset_tag),
+            'serial' => e($asset->serial),
+            'model' => ($asset->model) ? e($asset->model->name) : null,
+            'model_number' => ($asset->model) ? e($asset->model->model_number) : null,
+            'location' => ($asset->location) ? e($asset->location->name) : null,
+            'image' => ($asset->getImageUrl()) ? $asset->getImageUrl() : null,
+            'purchase_date' => Helper::getFormattedDateObject($asset->purchase_date, 'date'),
+            'age_months' => $asset->purchase_date ? (int) $asset->purchase_date->diffInMonths(now()) : null,
+            'sale_price' => $asset->sale_price,
+            'available_actions' => [
+                'request_purchase' => ! $purchaseRequested,
+                'cancel_purchase' => $purchaseRequested,
+            ],
+        ];
     }
 
     public function transformAssetCompact(Asset $asset)
