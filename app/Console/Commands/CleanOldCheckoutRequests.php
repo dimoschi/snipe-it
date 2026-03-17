@@ -72,6 +72,11 @@ class CleanOldCheckoutRequests extends Command
 
     private function shouldSoftDelete(CheckoutRequest $request)
     {
+        // Don't delete fulfilled purchase requests, they are audit records
+        if ($request->fulfilled_at !== null) {
+            return false;
+        }
+
         return $request->requestable->trashed() || $request->user->trashed();
     }
 }
